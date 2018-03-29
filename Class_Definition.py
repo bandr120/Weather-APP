@@ -5,6 +5,111 @@ import sqlite3
 from geopy.geocoders import Nominatim
 
 
+class User_Interface:
+    
+    def __init__(self):
+        
+        self.ms=Main_Service()
+        self.printmain()
+        
+    def load_opt1(self):
+        x=input('Enter Location Keyword to Search :')
+        y=self.ms.loc.search_nominatim(x)
+        print(y)
+        input('')
+        self.printmain()
+        
+    def load_opt2(self):
+        y=self.ms.loc.detect_location()
+        print(y)
+        input('')
+        self.printmain()
+
+    def load_opt3(self):
+        x=input('Enter City Name :')
+        y=input('Enter Latitude :')
+        z=input('Enter Longitude :')
+        self.ms.loc.set_location(x,y,z)
+        self.ms.__init__()
+        input('')
+        self.printmain()
+
+
+    def load_opt4(self):
+        x=self.ms.w.get_weather_now()
+        print(x)
+        input('')
+        self.printmain()
+
+    def load_opt5(self):
+        x=self.ms.w.get_weather_forecast()
+        print(x)
+        input('')
+        self.printmain()
+
+        
+    def load_opt6(self):
+        x=self.ms.db.exec('select * from weathernow_dict')
+        for i in x:
+            print(*i)
+        input('')
+        self.printmain()
+
+    def load_opt7(self):
+        x=self.ms.db.exec('select * from weatherforecast_dict')
+        for i in x:
+            print(*i)
+        input('')
+        self.printmain()
+    def load_opt8(self):
+        self.ms.db.write(self.ms.wnow,'weathernow_dict')
+        input('')
+        self.printmain()        
+
+    def load_opt9(self):
+        self.ms.db.write(self.ms.wfor,'weatherforecast_dict')
+        input('')
+        self.printmain()
+        
+    def printmain(self):
+        self.input=None
+        print("\n\n\n")
+        print(' M A I N  M E N U '.center(80,"="))
+        print("|",' '.center(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 1 ]-  Check Address Information.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 2 ]-  Auto Detect Location.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 3 ]-  Set Default Location.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 4 ]-  Show Weather Now.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 5 ]-  Show 36 Hours Weather.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 6 ]-  DB.Show Weather Now.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 7 ]-  DB.Show 36 Hours Weather.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 8 ]-  DB.Save Weather Now.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [ 9 ]-  DB.Save 36 Hours Weather.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",'                [10 ]-  Exit Application.'.ljust(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",' '.center(76," "),"|")
+        print("|",''.center(76,"="),"|")
+        self.input=input('Plese Enter Your Choice : ')
+        if self.input =='1':self.load_opt1()                                             #[ 1 ]-  Check Address Information.
+        elif self.input=='2':self.load_opt2()                                      #[ 2 ]-  Auto Detect Location.
+        elif self.input=='3':self.load_opt3()                                      #[ 3 ]-  Set Default City.
+        elif self.input=='4':self.load_opt4()                         #[ 4 ]-  Show Weather Now.
+        elif self.input=='5':self.load_opt5()                    #[ 5 ]-  Show 36 Hours Weather.
+        elif self.input=='6':self.load_opt6()                            #[ 6 ]-  DB.Show Offline Weather Now.(Last Saved Weather Record)
+        elif self.input=='7':self.load_opt7()                            #[ 7 ]-  DB.Show Offline 36 Hours Weather.(Last Saved Weather Record)
+        elif self.input=='8':self.load_opt8()                           #[ 8 ]-  DB.Save Weather Now.
+        elif self.input=='9':self.load_opt9()                            #[ 9 ]-  DB.Save 36 Hours Weather.
+
 
 class Weather:
     
@@ -93,6 +198,11 @@ class Locations:
         self.conf.write('user_setting','city_name',str(city))
         self.conf.write('user_setting','lat',str(lat))
         self.conf.write('user_setting','lon',str(lon))
+        t=self.conf.get_section('user_setting')
+        self.city=t['city_name']
+        self.lat=t['lat']
+        self.lon=t['lon']
+
 
 
     def detect_location(self):
@@ -235,4 +345,77 @@ class Database:
             for si in range (0,len(i)):tem[si]=i[si]
             qur="insert into {0} values {1}".format(tab,tuple(tem))
             self.exec(qur)
+
+
+
+
+class Configs_Double:
+    
+    def __init__(self):
+        self.dc={}
+        self.load()
+
+
+    def load(self):
+        self.dc={'user_setting': {'city_name': 'Hamden', 'lat': '41.3745', 'lon': '-72.9396'}, 'db_1': {'database': 'data.db'}, 'show_1': {'return': 'main.temp_min,weather.[0].description'}, 'show_2': {'return': 'city,region_code,country_name'}, 'show_4': {'return': 'cnt,list.[0].dt'}, 'api_1': {'url': 'http://api.openweathermap.org/data/2.5/weather?', 'units': 'imperial', 'key': '612ea5670775e78679efe28d9c00265e', 'formula': '{0}lat={1}&lon={2}&mode={3}&units={4}&APPID={5}', 'keys': 'url,lat,lon,mode,units,key', 'lat': '41.3745', 'lon': '-72.9396', 'mode': 'json', 'return': 'main.temp_min,weather.[*].description'}, 'api_2': {'url': 'https://ipapi.co', 'mode': 'json', 'formula': '{0}/{1}', 'keys': 'url,mode', 'return': 'city,region_code,country_name'}, 'api_3': {'url': 'https://maps.googleapis.com/maps/api/place/textsearch', 'mode': 'json', 'city': 'Hamden', 'key': 'AIzaSyD5ksNiWdfsJik4Uh_v9o4M5OMluzcq3KY', 'formula': '{0}/{1}?query={2}&key={3}', 'keys': 'url,mode,city,key', 'return': 'results.0.location.lat,results.0.location.lng,results.0.name'}, 'api_4': {'url': 'http://api.openweathermap.org/data/2.5/forecast?', 'units': 'imperial', 'key': '612ea5670775e78679efe28d9c00265e', 'formula': '{0}lat={1}&lon={2}&mode={3}&units={4}&APPID={5}', 'keys': 'url,lat,lon,mode,units,key', 'lat': '41.3745', 'lon': '-72.9396', 'mode': 'json', 'return': 'weather.0.main,weather.main.temp'}, 'api_5': {'url': 'https://api.darksky.net/forecast', 'units': 'imperial', 'key': 'e28826d45c3a9316c946396a2c8f1a71', 'formula': '{0}/{1}/{2},{3}', 'keys': 'url,key,lat,lon', 'lat': '41.3745', 'lon': '-72.9396', 'return': 'latitude,longitude,currently.summary,currently.temperature,daily.data.[0]'}, 'test': {'key': 'hello world'}}
+            
+            
+    def get_section(self,sec):
+        return self.dc[sec]
+    
+    def get_all(self):
+        return self.dc
+
+
+class ApiGateway_Double:
+    
+    def __init__(self,api_no):
+        self.url=None
+        c = Configs_Double()
+        self.d = c.get_section(api_no)
+        self.construct_api()
+        self.json=None
+
+        
+
+    def get(self):
+        return {'coord': {'lon': -72.94, 'lat': 41.37}, 'weather': [{'id': 500, 'main': 'Rain', 'description': 'light rain', 'icon': '10n'}, {'id': 701, 'main': 'Mist', 'description': 'mist', 'icon': '50n'}], 'base': 'stations', 'main': {'temp': 38.55, 'pressure': 1019, 'humidity': 86, 'temp_min': 33.8, 'temp_max': 42.8}, 'visibility': 8047, 'wind': {'speed': 4.7}, 'clouds': {'all': 90}, 'dt': 1522228320, 'sys': {'type': 1, 'id': 627, 'message': 0.1648, 'country': 'US', 'sunrise': 1522233655, 'sunset': 1522278783}, 'id': 4839373, 'name': 'New Haven County', 'cod': 200}
+    
+    
+    def construct_api(self):
+        key_lst=[]
+        value_lst=[]
+        key_lst=list(self.d['keys'].split(','))
+        for ff in key_lst:
+            value_lst.append(self.d[ff])
+        self.url=self.d['formula'].format(*value_lst)
+
+
+
+class Main_Service:
+    def __init__(self):
+        self.loc=Locations()
+        self.w=Weather()
+        self.wnow=self.w.weathernow_dict
+        self.wfor=self.w.weatherforecast_dict
+        self.city=self.w.city
+        self.lat=self.w.lat
+        self.lon=self.w.lon
+        self.db=Database('db_1')
+
+
+
+
+
+    def exec_opt(self,opt,*args):
+        if opt ==1:return self.loc.search_nominatim(args[0])                #[ 1 ]-  Check Address Information.
+        elif opt==2:return self.loc.detect_location()                       #[ 2 ]-  Auto Detect Location.
+        elif opt==3:return self.loc.set_location(args[0],args[1],args[2])   #[ 3 ]-  Set Default City.
+        elif opt==4:return self.w.get_weather_now()                         #[ 4 ]-  Show Weather Now.
+        elif opt==5:return self.w.get_weather_forecast()                    #[ 5 ]-  Show 36 Hours Weather.
+        elif opt==6:return self.db.exec(args[0])                            #[ 6 ]-  DB.Show Offline Weather Now.(Last Saved Weather Record)
+        elif opt==7:return self.db.exec(args[0])                            #[ 7 ]-  DB.Show Offline 36 Hours Weather.(Last Saved Weather Record)
+        elif opt==8:return self.db.exec(args[0])                            #[ 8 ]-  DB.Save Weather Now.
+        elif opt==9:return self.db.exec(args[0])                            #[ 9 ]-  DB.Save 36 Hours Weather.
+            
 
